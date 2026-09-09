@@ -1,0 +1,22 @@
+:root {
+  --green: #1b5e20;
+  --green-2: #2e7d32;
+  --green-dark: #0f3d13;
+  --leaf: #3aa655;
+  --ink: #1a1a1a;
+  --line: #d8ddd6;
+  --panel: #f6f8f5;
+
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: #eef1ec;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
