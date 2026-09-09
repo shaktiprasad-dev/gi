@@ -35,13 +35,14 @@ const IconClipboard = ({ size = 20 }: { size?: number }) => (
     <path d="M13 10h4M13 14h4M13 18h4" strokeWidth="1.4" />
   </svg>
 )
-const IconTermsList = () => (
-  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <rect x="4" y="3" width="16" height="18" rx="2" />
-    <rect x="8.5" y="1.5" width="7" height="3.5" rx="1" fill="currentColor" stroke="none" />
-    <path d="M8 9h8M8 13h8M8 17h5" strokeLinecap="round" />
-  </svg>
-)
+// Currently unused — the icon next to "TERMS & CONDITIONS" is commented out below.
+// const IconTermsList = () => (
+//   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+//     <rect x="4" y="3" width="16" height="18" rx="2" />
+//     <rect x="8.5" y="1.5" width="7" height="3.5" rx="1" fill="currentColor" stroke="none" />
+//     <path d="M8 9h8M8 13h8M8 17h5" strokeLinecap="round" />
+//   </svg>
+// )
 const IconCheck = () => (
   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
     <circle cx="12" cy="12" r="10" fill="#2f8f3a" />
@@ -217,7 +218,7 @@ const EstimateDocument = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
           {/* ---------------- terms ---------------- */}
           <div className="ed-terms">
             <div className="ed-terms-legend">
-              <IconTermsList />
+              {/* <IconTermsList /> */}
               <span>TERMS &amp; CONDITIONS</span>
             </div>
             <ul className="ed-terms-list">

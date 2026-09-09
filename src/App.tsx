@@ -6,6 +6,7 @@ import EstimateDocument from './EstimateDocument'
 import type { EstimateData, LineItem } from './types'
 import { grandTotal, lineAmount } from './types'
 import { formatINR } from './numberToWords'
+import { notifyPdfDownload } from './api'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 const newItem = (): LineItem => ({ id: uid(), description: '', area: '', rate: '' })
@@ -150,25 +151,25 @@ export default function App() {
         useCORS: true,
         windowWidth: node.scrollWidth,
       })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pageW = pdf.internal.pageSize.getWidth()
-      const pageH = pdf.internal.pageSize.getHeight()
-      const imgW = pageW
-      const imgH = (canvas.height * imgW) / canvas.width
 
-      let heightLeft = imgH
-      let position = 0
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
-      heightLeft -= pageH
-      while (heightLeft > 0) {
-        position -= pageH
-        pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH)
-        heightLeft -= pageH
-      }
+      // Single page, sized to fit the content — no page breaks. Width stays a
+      // standard A4 width (210mm); height grows with however tall the
+      // estimate is.
+      const pageW = 210
+      const pageH = (canvas.height * pageW) / canvas.width
+      const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: [pageW, pageH] })
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageW, pageH)
+
       const safe = (data.quotationNo || 'estimate').replace(/[^\w.-]+/g, '-')
       pdf.save(`Green-Interior-${safe}.pdf`)
+
+      // Notify backend in the background — sends a mail via nodemailer.
+      notifyPdfDownload({
+        clientName: data.clientName,
+        clientMobile: data.clientMobile,
+        quotationNo: data.quotationNo,
+        total,
+      })
     } finally {
       setBusy(false)
     }
