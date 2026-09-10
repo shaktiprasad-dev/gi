@@ -55,9 +55,27 @@
   justify-content: center;
 }
 
+.app-brand {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.app-logo {
+  height: 44px;
+  width: auto;
+  flex: none;
+  display: block;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .app-h1 {
-  font-size: 20px;
-  margin: 0 0 4px;
+  font-size: 15px;
+  /* sit on the logo wordmark's baseline (its text ends ~9px above the image edge) */
+  margin: 0 0 9px;
+  line-height: 1;
   color: var(--green);
 }
 

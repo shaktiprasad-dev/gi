@@ -192,7 +192,10 @@ export default function App() {
   return (
     <div className="app" style={{ '--sidebar-w': `${sidebarWidth}px` } as React.CSSProperties}>
       <aside className="app-form">
-        <h1 className="app-h1">Estimate Builder</h1>
+        <div className="app-brand">
+          <img className="app-logo" src="/logo.jpeg" alt="Green Interior" />
+          <h1 className="app-h1">Estimate Builder</h1>
+        </div>
         <p className="app-lead">
           Enter the requirement and every rate manually. The preview matches the print layout — click
           <strong> Download PDF</strong> when done.
