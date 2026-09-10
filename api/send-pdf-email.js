@@ -10,6 +10,10 @@ import nodemailer from 'nodemailer'
  * Required env vars (Vercel > Project > Settings > Environment Variables):
  *   SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, MAIL_FROM, MAIL_TO
  */
+// The PDF travels base64-encoded in the JSON body; raise the parser limit above
+// the 1 MB default. (Vercel still caps the whole request at ~4.5 MB.)
+export const config = { api: { bodyParser: { sizeLimit: '4mb' } } }
+
 export default async function handler(req, res) {
   // Health check: open the URL in a browser to confirm the function is deployed.
   if (req.method === 'GET') {
@@ -25,11 +29,21 @@ export default async function handler(req, res) {
   const body =
     typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body ?? {}
 
-  const { clientName, clientMobile, clientEmail, quotationNo, total } = body
+  const { clientName, clientMobile, clientEmail, quotationNo, total, fileName, pdfBase64 } = body
 
   if (!clientName || !quotationNo) {
     return res.status(400).json({ error: 'Missing required fields' })
   }
+
+  const attachments = pdfBase64
+    ? [
+        {
+          filename: fileName || `Quotation-${quotationNo}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+          contentType: 'application/pdf',
+        },
+      ]
+    : []
 
   try {
     const transporter = nodemailer.createTransport({
@@ -52,8 +66,11 @@ export default async function handler(req, res) {
         ${clientEmail ? `<p><strong>Client Email:</strong> ${clientEmail}</p>` : ''}
         <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
         <hr>
-        <p>Automated notification sent when an estimate PDF is downloaded.</p>
+        <p>Automated notification sent when an estimate PDF is downloaded.${
+          pdfBase64 ? ' The estimate PDF is attached.' : ''
+        }</p>
       `,
+      attachments,
     })
 
     return res.status(200).json({ success: true })

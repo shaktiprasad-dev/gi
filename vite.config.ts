@@ -22,7 +22,7 @@ function pdfMailPlugin(env: Record<string, string>): Plugin {
       let raw = ''
       req.on('data', (c) => {
         raw += c
-        if (raw.length > 1e6) req.destroy()
+        if (raw.length > 8e6) req.destroy()
       })
       req.on('end', () => {
         try {
@@ -45,11 +45,23 @@ function pdfMailPlugin(env: Record<string, string>): Plugin {
     }
 
     try {
-      const { clientName, clientMobile, clientEmail, quotationNo, total } = await readJson(req)
+      const { clientName, clientMobile, clientEmail, quotationNo, total, fileName, pdfBase64 } =
+        await readJson(req)
 
       if (!clientName || !quotationNo) {
         return send(400, { error: 'Missing required fields' })
       }
+
+      const attachments =
+        typeof pdfBase64 === 'string' && pdfBase64
+          ? [
+              {
+                filename: (fileName as string) || `Quotation-${quotationNo}.pdf`,
+                content: Buffer.from(pdfBase64, 'base64'),
+                contentType: 'application/pdf',
+              },
+            ]
+          : []
 
       await transporter.sendMail({
         from: env.MAIL_FROM || env.SMTP_USER,
@@ -64,8 +76,11 @@ function pdfMailPlugin(env: Record<string, string>): Plugin {
           ${clientEmail ? `<p><strong>Client Email:</strong> ${clientEmail}</p>` : ''}
           <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
           <hr>
-          <p>Automated notification sent when an estimate PDF is downloaded.</p>
+          <p>Automated notification sent when an estimate PDF is downloaded.${
+            attachments.length ? ' The estimate PDF is attached.' : ''
+          }</p>
         `,
+        attachments,
       })
 
       send(200, { success: true })

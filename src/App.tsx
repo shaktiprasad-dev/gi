@@ -161,14 +161,21 @@ export default function App() {
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageW, pageH)
 
       const safe = (data.quotationNo || 'estimate').replace(/[^\w.-]+/g, '-')
-      pdf.save(`Green-Interior-${safe}.pdf`)
+      const fileName = `Green-Interior-${safe}.pdf`
+      pdf.save(fileName)
 
-      // Notify backend in the background — sends a mail via nodemailer.
+      // Same bytes that were just downloaded, base64-encoded for the mail attachment.
+      const dataUri = pdf.output('datauristring')
+      const pdfBase64 = dataUri.slice(dataUri.indexOf(',') + 1)
+
+      // Notify backend in the background — sends a mail (with the PDF attached) via nodemailer.
       notifyPdfDownload({
         clientName: data.clientName,
         clientMobile: data.clientMobile,
         quotationNo: data.quotationNo,
         total,
+        fileName,
+        pdfBase64,
       })
     } finally {
       setBusy(false)
