@@ -11,6 +11,11 @@ import nodemailer from 'nodemailer'
  *   SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, MAIL_FROM, MAIL_TO
  */
 export default async function handler(req, res) {
+  // Health check: open the URL in a browser to confirm the function is deployed.
+  if (req.method === 'GET') {
+    return res.status(200).json({ ok: true, route: 'send-pdf-email' })
+  }
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method Not Allowed' })
