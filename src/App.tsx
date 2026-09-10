@@ -157,8 +157,10 @@ export default function App() {
       // estimate is.
       const pageW = 210
       const pageH = (canvas.height * pageW) / canvas.width
-      const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: [pageW, pageH] })
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageW, pageH)
+      // compress + JPEG keeps the file small enough to ride along in the mail
+      // request (Vercel rejects request bodies over ~4.5 MB with a 413).
+      const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: [pageW, pageH], compress: true })
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, pageW, pageH)
 
       const safe = (data.quotationNo || 'estimate').replace(/[^\w.-]+/g, '-')
       const fileName = `Green-Interior-${safe}.pdf`
@@ -167,6 +169,9 @@ export default function App() {
       // Same bytes that were just downloaded, base64-encoded for the mail attachment.
       const dataUri = pdf.output('datauristring')
       const pdfBase64 = dataUri.slice(dataUri.indexOf(',') + 1)
+      // Stay clear of the ~4.5 MB request cap; if it's still too big, send the
+      // notification without the attachment rather than losing the mail entirely.
+      const withinLimit = pdfBase64.length < 3_800_000
 
       // Notify backend in the background — sends a mail (with the PDF attached) via nodemailer.
       notifyPdfDownload({
@@ -175,7 +180,7 @@ export default function App() {
         quotationNo: data.quotationNo,
         total,
         fileName,
-        pdfBase64,
+        pdfBase64: withinLimit ? pdfBase64 : undefined,
       })
     } finally {
       setBusy(false)
